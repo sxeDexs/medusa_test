@@ -1,0 +1,75 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+
+      - name: Create .env files on server
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} '
+            mkdir -p /opt/medusa
+            cd /opt/medusa
+            cat > .env << EOF
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          MINIO_ROOT_USER=${{ secrets.MINIO_ROOT_USER }}
+          MINIO_ROOT_PASSWORD=${{ secrets.MINIO_ROOT_PASSWORD }}
+          EOF
+
+          cat > ./my-medusa-store/.env.prod << EOF
+          DATABASE_URL=postgres://postgres:${{ secrets.POSTGRES_PASSWORD }}@postgres:5432/medusa-store
+          REDIS_URL=redis://redis:6379
+          STORE_CORS=https://mm.dev.gorgojs.ru
+          ADMIN_CORS=https://admin.mm.dev.gorgojs.ru
+          AUTH_CORS=https://mm.dev.gorgojs.ru,https://admin.mm.dev.gorgojs.ru
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          COOKIE_SECRET=${{ secrets.COOKIE_SECRET }}
+          S3_ENDPOINT=http://minio:9000
+          S3_BUCKET=medusa
+          S3_ACCESS_KEY=${{ secrets.MINIO_ROOT_USER }}
+          S3_SECRET_KEY=${{ secrets.MINIO_ROOT_PASSWORD }}
+          S3_FORCE_PATH_STYLE=true
+          S3_REGION=us-east-1
+          MEDUSA_ADMIN_BACKEND_URL=https://admin.mm.dev.gorgojs.ru
+          PORT=9000
+          NODE_ENV=production
+          MEDUSA_ADMIN_EMAIL=${{ secrets.MEDUSA_ADMIN_EMAIL }}
+          MEDUSA_ADMIN_PASSWORD=${{ secrets.MEDUSA_ADMIN_PASSWORD }}
+          EOF
+            cat > ./my-medusa-store-storefront/.env.prod << EOF
+          MEDUSA_BACKEND_URL=https://admin.mm.dev.gorgojs.ru
+          NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}
+          NEXT_PUBLIC_BASE_URL=https://mm.dev.gorgojs.ru
+          NEXT_PUBLIC_DEFAULT_REGION=us
+          REVALIDATE_SECRET=supersecret
+          EOF
+          '
+
+      - name: Copy docker-compose and build context
+        run: |
+          rsync -avz --delete \
+            -e "ssh -o StrictHostKeyChecking=no" \
+            ./docker-compose.prod.yml \
+            ./my-medusa-store \
+            ./my-medusa-store-storefront \
+            ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }}:/opt/medusa/
+
+      - name: Deploy with Docker Compose
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} '
+            cd /opt/medusa
+            # Загружаем образы (если используете registry) или собираем на месте
+            docker compose -f docker-compose.prod.yml pull || true
+            docker compose -f docker-compose.prod.yml up --build -d
+          '

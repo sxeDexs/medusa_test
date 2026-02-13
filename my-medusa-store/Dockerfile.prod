@@ -1,0 +1,19 @@
+FROM node:20-alpine
+WORKDIR /server
+
+ARG MEDUSA_ADMIN_BACKEND_URL
+ENV MEDUSA_ADMIN_BACKEND_URL=$MEDUSA_ADMIN_BACKEND_URL
+
+COPY package.json package-lock.json ./
+RUN npm install --legacy-peer-deps
+
+COPY . .
+RUN npm run build
+
+COPY start.prod.sh ./
+RUN chmod +x start.prod.sh
+
+ENV NODE_ENV=production
+EXPOSE 9000
+
+ENTRYPOINT ["./start.prod.sh"]

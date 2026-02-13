@@ -60,7 +60,6 @@ services:
     volumes:
       - ./my-medusa-store:/server
       - /server/node_modules
-      - /server/node_modules/.vite
     networks:
       - medusa_network
 
