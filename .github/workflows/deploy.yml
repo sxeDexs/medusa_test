@@ -65,10 +65,23 @@ jobs:
           EOF
           '
 
-      - name: Deploy with Docker Compose
+      - name: Build Medusa image
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} '
             cd /opt/medusa
-            docker compose -f docker-compose.prod.yml pull || true
-            docker compose -f docker-compose.prod.yml up --build -d
+            docker compose -f docker-compose.prod.yml build medusa
+          '
+
+      - name: Build Storefront image
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} '
+            cd /opt/medusa
+            docker compose -f docker-compose.prod.yml build storefront
+          '
+
+      - name: Start all services
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} '
+            cd /opt/medusa
+            docker compose -f docker-compose.prod.yml up -d
           '
