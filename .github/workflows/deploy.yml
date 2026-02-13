@@ -72,16 +72,36 @@ jobs:
             docker compose -f docker-compose.prod.yml build medusa
           '
 
+      - name: Start Medusa and dependencies
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} '
+            cd /opt/medusa
+            docker compose -f docker-compose.prod.yml up -d postgres redis minio medusa
+          '
+
+      - name: Wait for Medusa to be ready
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} '
+            timeout 60 bash -c "until curl -s http://medusa:9000/health; do sleep 2; done"
+          '
+
       - name: Build Storefront image
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} '
             cd /opt/medusa
             docker compose -f docker-compose.prod.yml build \
               --build-arg NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY="${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}" \
-            storefront
+              storefront
           '
 
-      - name: Start all services
+      - name: Start Storefront
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} '
+            cd /opt/medusa
+            docker compose -f docker-compose.prod.yml up -d storefront
+          '
+
+      - name: Start all services (if not already running)
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} '
             cd /opt/medusa
