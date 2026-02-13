@@ -76,7 +76,9 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} '
             cd /opt/medusa
-            docker compose -f docker-compose.prod.yml build storefront
+            docker compose -f docker-compose.prod.yml build \
+              --build-arg NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY="${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}" \
+            storefront
           '
 
       - name: Start all services

@@ -63,6 +63,8 @@ services:
     build:
       context: ./my-medusa-store-storefront
       dockerfile: Dockerfile.prod
+      args:
+        NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY}
     deploy:
       resources:
         limits:
