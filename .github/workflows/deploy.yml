@@ -82,7 +82,7 @@ jobs:
       - name: Wait for Medusa to be ready
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} '
-            timeout 60 bash -c "until curl -s http://medusa:9000/health; do sleep 2; done"
+            timeout 600 bash -c "until curl -s http://medusa:9000/health; do sleep 2; done"
           '
 
       - name: Build Storefront image
