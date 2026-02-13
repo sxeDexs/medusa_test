@@ -34,6 +34,8 @@ services:
     build:
       context: ./my-medusa-store
       dockerfile: Dockerfile.prod
+      args:
+        MEDUSA_ADMIN_BACKEND_URL: ${MEDUSA_ADMIN_BACKEND_URL:-https://admin.mm.dev.gorgojs.ru}
     deploy:
       resources:
         limits:
