@@ -35,9 +35,9 @@ services:
       context: ./my-medusa-store
       dockerfile: Dockerfile.prod
     deploy:
-    resources:
-      limits:
-        memory: 2G
+      resources:
+        limits:
+          memory: 2G
     restart: always
     env_file:
       - ./my-medusa-store/.env.prod
@@ -64,9 +64,9 @@ services:
       context: ./my-medusa-store-storefront
       dockerfile: Dockerfile.prod
     deploy:
-    resources:
-      limits:
-        memory: 2G
+      resources:
+        limits:
+          memory: 1G
     restart: always
     env_file:
       - ./my-medusa-store-storefront/.env.prod
