@@ -165,8 +165,6 @@ REVALIDATE_SECRET=supersecret
 
    Благодаря этому `next build` может обращаться к уже работающему бэкенду через Traefik.
 
-   **Замечание:** на этом этапе пайплайн обрывается с ошибкой `ECONNREFUSED`.
-
 7. **Запуск Storefront**  
    После успешной сборки запускается контейнер `storefront`.
 
@@ -188,3 +186,4 @@ REVALIDATE_SECRET=supersecret
 - Зайти в админку `https://admin.mm.dev.gorgojs.ru/app` и создать настоящий publishable key.
 - Заменить значение секрета `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY` в GitHub Secrets на полученный ключ.
 - Перезапустить workflow (или вручную перезапустить storefront на сервере).
+
