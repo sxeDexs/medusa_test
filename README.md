@@ -1,4 +1,4 @@
-# Контейнеризация и развертывание Medusa
+# Контейнеризация и развертывание Medusa 
 # Medusa + Storefront (Next.js) + MinIO + Traefik
 
 > Краткое описание: репозиторий содержит backend на Medusa (админ + API) и Storefront на Next.js. Локальная разработка и тестирование проводятся через Docker (docker-compose). Для production предусмотрён `docker-compose.prod.yml` с Traefik, Postgres, Redis и MinIO.
@@ -186,4 +186,5 @@ REVALIDATE_SECRET=supersecret
 - Зайти в админку `https://admin.mm.dev.gorgojs.ru/app` и создать настоящий publishable key.
 - Заменить значение секрета `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY` в GitHub Secrets на полученный ключ.
 - Перезапустить workflow (или вручную перезапустить storefront на сервере).
+
 
